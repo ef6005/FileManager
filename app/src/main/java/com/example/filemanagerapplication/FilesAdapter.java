@@ -14,12 +14,12 @@ import java.util.List;
 
 public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FilesViewHolder> {
     private List<File> mFiles = new ArrayList<>();
-    private OnRecyclerViewItemClickListener<File> mOnClickListener;
+    private OnRecyclerViewItemClickListener<File> mOnItemListener;
 
     public FilesAdapter(List<File> files, OnRecyclerViewItemClickListener<File> onClickListener) {
         if (files != null)
             this.mFiles = files;
-        this.mOnClickListener = onClickListener;
+        this.mOnItemListener = onClickListener;
     }
 
     @NonNull
@@ -60,7 +60,11 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FilesViewHol
                 fileIconIv.setImageResource(R.drawable.ic_directory_yellow400_80dp);
             }
 
-            mViewGroup.setOnClickListener(view -> mOnClickListener.onItemClick(mFiles.get(getAdapterPosition()), getAdapterPosition()));
+            mViewGroup.setOnClickListener(view -> mOnItemListener.onItemClick(mFiles.get(getAdapterPosition())));
+            mViewGroup.setOnLongClickListener(view -> {
+                mOnItemListener.onItemLongClicked(mFiles.get(getAdapterPosition()), getAdapterPosition());
+                return true;
+            });
         }
     }
 

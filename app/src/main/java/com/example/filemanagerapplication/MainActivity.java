@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_PERMISSION_REQUEST_CODE);
             } else {//we have permission here: or inside onRequestPermissionResult()
                 //do not show permission emptyState
-                //TODO:### show another empty staye if needed
+                //TODO:### show another empty state if needed
                 emptyStateViewGroup.setVisibility(View.GONE);
                 File file = android.os.Environment.getExternalStorageDirectory();
-                showDirectoryFiles(file, false);
+                showDirectoryOrFile(file, false);
             }
         }
     }
@@ -81,7 +82,11 @@ public class MainActivity extends AppCompatActivity {
         titleBarTv.setText(title);
     }
 
-    private void showDirectoryFiles(File directory, boolean addToBackStak) {
+    public void showDirectoryOrFile(File directory, boolean addToBackStack) {
+        if (directory.isFile()) {
+            //TODO:###show file via intents
+            Toast.makeText(this, directory.getName() + "is clicked to open", Toast.LENGTH_SHORT).show();
+        } else
         //replace new fragment to show directory files
         //check if directory parameter is  really directory or file
         if (directory.isDirectory()) {
@@ -92,13 +97,13 @@ public class MainActivity extends AppCompatActivity {
             try {
                 directoryFilesFragment = DirectoryFilesFragment.newInstance(directory.getPath());
             } catch (IOException e) {
-                Log.e(LOG_TAG, "showDirectoryFiles: " + e.getMessage());
+                Log.e(LOG_TAG, "showDirectoryOrFile(): " + e.getMessage());
             }
-            directoryFilesFragment.setOnItemClickListener((File file, int position) -> showDirectoryFiles(file, true));
+
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.main_fl_fragmentContainer, directoryFilesFragment);
 
-            if (addToBackStak)
+            if (addToBackStack)
                 fragmentTransaction.addToBackStack(null);
             else
                 pageCounter++;

@@ -7,10 +7,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class DirectoryFilesFragment extends Fragment {
     private File mDirectory;
     private RecyclerView mFilesRv;
     private FilesAdapter mAdapter;
-    private OnRecyclerViewItemClickListener<File> mOnItemClickListener;
+//    private OnRecyclerViewItemClickListener<File> mOnItemClickListener;
 
     public String getPath() {
         return mDirectory.getPath();
@@ -61,9 +61,21 @@ public class DirectoryFilesFragment extends Fragment {
 
         //setup adapter
         List<File> files = new ArrayList<>(Arrays.asList(mDirectory.listFiles()));
-        mAdapter = new FilesAdapter(files
-                , (File file, int position) -> {
-            if (mOnItemClickListener != null) mOnItemClickListener.onItemClick(file, position);
+        mAdapter = new FilesAdapter(files, new OnRecyclerViewItemClickListener<File>() {
+            @Override
+            public void onItemClick(File file) {
+                //TODO:###implement multi select mode
+
+                //click on file or directory
+                ((MainActivity) getActivity()).showDirectoryOrFile(file, true);
+            }
+
+            @Override
+            public void onItemLongClicked(File file, int position) {
+                //TODO:###implement multi select mode
+
+                //TODO:#Long click on file or directory
+            }
         });
 
         //recycler view
@@ -72,20 +84,9 @@ public class DirectoryFilesFragment extends Fragment {
         mFilesRv.setAdapter(mAdapter);
     }
 
-    private void onFileClicked(View view) {
-        //TODO:roll over to main activity
-    }
 
-    private boolean onFileLongClicked(View view) {
-        //TODO:roll over to main activity
-        return false;
-    }
-
-    public void setOnItemClickListener(OnRecyclerViewItemClickListener<File> onItemClickListener) {
-        this.mOnItemClickListener = onItemClickListener;
-    }
 
     public void refresh() {
-        Toast.makeText(getContext(), "Refreshed", Toast.LENGTH_SHORT).show();
+        Log.i("hamid", "refresh: " + getPath());
     }
 }
