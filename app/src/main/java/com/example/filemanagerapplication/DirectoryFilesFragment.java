@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,11 @@ public class DirectoryFilesFragment extends Fragment {
     private File mDirectory;
     private RecyclerView mFilesRv;
     private FilesAdapter mAdapter;
+    private OnRecyclerViewItemClickListener<File> mOnItemClickListener;
+
+    public String getPath() {
+        return mDirectory.getPath();
+    }
 
     public static DirectoryFilesFragment newInstance(String directoryPath) throws IOException {
         File directory = new File(directoryPath);
@@ -55,7 +61,10 @@ public class DirectoryFilesFragment extends Fragment {
 
         //setup adapter
         List<File> files = new ArrayList<>(Arrays.asList(mDirectory.listFiles()));
-        mAdapter = new FilesAdapter(files, this::onFileClicked, this::onFileLongClicked);
+        mAdapter = new FilesAdapter(files
+                , (File file, int position) -> {
+            if (mOnItemClickListener != null) mOnItemClickListener.onItemClick(file, position);
+        });
 
         //recycler view
         mFilesRv = view.findViewById(R.id.fragmentDirectoryFiles_rv_files);
@@ -70,5 +79,13 @@ public class DirectoryFilesFragment extends Fragment {
     private boolean onFileLongClicked(View view) {
         //TODO:roll over to main activity
         return false;
+    }
+
+    public void setOnItemClickListener(OnRecyclerViewItemClickListener<File> onItemClickListener) {
+        this.mOnItemClickListener = onItemClickListener;
+    }
+
+    public void refresh() {
+        Toast.makeText(getContext(), "Refreshed", Toast.LENGTH_SHORT).show();
     }
 }

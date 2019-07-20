@@ -22,11 +22,13 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
     private static final int WRITE_PERMISSION_REQUEST_CODE = 1001;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private int pageCounter = 0;
 
     public Button givePermissionBtn;
     public TextView emptyStateTv;
     public TextView titleBarTv;
     public ViewGroup emptyStateViewGroup;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,29 +76,48 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void showDirectoryFiles(File directory, boolean addToBackStak) {
-        //set title bar to existing path
-        setTitleBar(directory.getPath());
+    private void setTitleBar(String title) {
+        TextView titleBarTv = findViewById(R.id.main_tv_titleBar);
+        titleBarTv.setText(title);
+    }
 
+    private void showDirectoryFiles(File directory, boolean addToBackStak) {
         //replace new fragment to show directory files
         //check if directory parameter is  really directory or file
         if (directory.isDirectory()) {
+            //set title bar to existing path
+            setTitleBar(directory.getPath());
+
             DirectoryFilesFragment directoryFilesFragment = null;
             try {
                 directoryFilesFragment = DirectoryFilesFragment.newInstance(directory.getPath());
             } catch (IOException e) {
                 Log.e(LOG_TAG, "showDirectoryFiles: " + e.getMessage());
             }
+            directoryFilesFragment.setOnItemClickListener((File file, int position) -> showDirectoryFiles(file, true));
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.main_fl_fragmentContainer, directoryFilesFragment);
+
             if (addToBackStak)
                 fragmentTransaction.addToBackStack(null);
+            else
+                pageCounter++;
+
             fragmentTransaction.commit();
         }
     }
 
-    private void setTitleBar(String title) {
-        TextView titleBarTv = findViewById(R.id.main_tv_titleBar);
-        titleBarTv.setText(title);
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+            pageCounter--;
+
+        if (pageCounter >= 0) {
+            DirectoryFilesFragment activeFragment = (DirectoryFilesFragment) getSupportFragmentManager().findFragmentById(R.id.main_fl_fragmentContainer);
+            setTitleBar(activeFragment.getPath());
+            activeFragment.refresh();
+        }
     }
 }

@@ -14,14 +14,12 @@ import java.util.List;
 
 public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FilesViewHolder> {
     private List<File> mFiles = new ArrayList<>();
-    private View.OnClickListener mOnClickListener;
-    private View.OnLongClickListener mOnLongClickListener;
+    private OnRecyclerViewItemClickListener<File> mOnClickListener;
 
-    public FilesAdapter(List<File> files, View.OnClickListener onClickListener, View.OnLongClickListener onLongClickListener) {
+    public FilesAdapter(List<File> files, OnRecyclerViewItemClickListener<File> onClickListener) {
         if (files != null)
             this.mFiles = files;
         this.mOnClickListener = onClickListener;
-        this.mOnLongClickListener = onLongClickListener;
     }
 
     @NonNull
@@ -43,14 +41,14 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FilesViewHol
     public class FilesViewHolder extends RecyclerView.ViewHolder {
         private ImageView fileIconIv;
         private TextView fileNameTv;
+        private ViewGroup mViewGroup;
 
         public FilesViewHolder(@NonNull View itemView) {
             super(itemView);
 
             fileIconIv = itemView.findViewById(R.id.itemFile_iv_fileIcon);
             fileNameTv = itemView.findViewById(R.id.itemFile_tv_fileName);
-            itemView.setOnClickListener(mOnClickListener);
-            itemView.setOnLongClickListener(mOnLongClickListener);
+            mViewGroup = (ViewGroup) itemView;
         }
 
         public void bindFile(File file) {
@@ -61,6 +59,8 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FilesViewHol
             } else if (file.isDirectory()) {
                 fileIconIv.setImageResource(R.drawable.ic_directory_yellow400_80dp);
             }
+
+            mViewGroup.setOnClickListener(view -> mOnClickListener.onItemClick(mFiles.get(getAdapterPosition()), getAdapterPosition()));
         }
     }
 
